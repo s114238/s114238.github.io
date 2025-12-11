@@ -1,76 +1,91 @@
 <!DOCTYPE html>
-<title>企鵝配對系統</title>
-<style>
-body {
-font-family: Arial, sans-serif;
-background: #eef7ff;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-height: 100vh;
-margin: 0;
-}
-h1 {
-margin-bottom: 20px;
-}
-.penguin-box {
-display: flex;
-gap: 40px;
-margin-top: 20px;
-}
-.penguin {
-text-align: center;
-}
-.penguin img {
-width: 150px;
-height: 150px;
-object-fit: contain;
-}
-button {
-padding: 10px 20px;
-font-size: 16px;
-cursor: pointer;
-border-radius: 8px;
-}
-</style>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>企鵝配對系統</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef7ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .penguin-box {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .penguin {
+      text-align: center;
+    }
+    .penguin img {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-<h1>企鵝配對系統</h1>
-<button onclick="matchPenguins()">隨機配對！</button>
+  <h1>企鵝配對系統</h1>
+  <button onclick="matchPenguins()">隨機配對！</button>
 
+  <div class="penguin-box">
+    <div class="penguin">
+      <h3>你的企鵝</h3>
+      <img id="userPenguin" src="" alt="你的企鵝" />
+    </div>
+    <div class="penguin">
+      <h3>配對企鵝</h3>
+      <img id="matchPenguin" src="" alt="配對企鵝" />
+    </div>
+  </div>
 
-<div class="penguin-box">
-<div class="penguin">
-<h3>你的企鵝</h3>
-<img id="userPenguin" src="" alt="你的企鵝" />
-</div>
-<div class="penguin">
-<h3>配對企鵝</h3>
-<img id="matchPenguin" src="" alt="配對企鵝" />
-</div>
-</div>
+  <script>
+    const penguins = [
+      'https://www.clipartmax.com/png/middle/217-2179065_cute-penguin-illustration-chibi-penguin-transparent-background.png',
+      'https://www.stickpng.com/assets/images/5b1e073a4cfab36bce0e48b9.png',
+      'https://www.toppng.com/uploads/preview/small-penguin-png-transparent-background-small-penguin-11562915292.png',
+      'https://www.freeiconspng.com/uploads/penguin-png-image-0.png',
+      'https://www.stickpng.com/assets/images/580a427f4f6ae202fd575f6c.png',
+      'https://www.pngmart.com/files/22/Cute-Penguin-PNG.png',
+      'https://www.pngall.com/wp-content/uploads/2016/06/Penguin-PNG.png',
+      'https://www.pngmart.com/files/22/Baby-Penguin-PNG.png',
+      'https://www.pngmart.com/files/22/Penguin-Transparent.png',
+      'https://www.pngmart.com/files/22/Cartoon-Penguin-PNG.png',
+      'https://www.pngmart.com/files/22/Penguin-PNG-Image.png',
+      'https://www.clipartmax.com/png/middle/217-2179069_cute-penguin-penguin.png',
+      'https://www.freeiconspng.com/uploads/cute-penguin-png-14.png',
+      'https://www.freeiconspng.com/uploads/penguin-transparent-png-1.png',
+      'https://www.pngall.com/wp-content/uploads/8/Penguin-PNG-Picture.png',
+      'https://www.pngall.com/wp-content/uploads/8/Penguin-PNG-HD.png',
+      'https://www.pngall.com/wp-content/uploads/8/Penguin-PNG-Free-Download.png',
+      'https://www.pngmart.com/files/22/Cool-Penguin-PNG.png',
+      'https://www.pngmart.com/files/22/Snow-Penguin-PNG.png',
+      'https://www.pngmart.com/files/22/Cute-Baby-Penguin-PNG.png'
+    ];
 
+    function randomPenguin() {
+      return penguins[Math.floor(Math.random() * penguins.length)];
+    }
 
-<script>
-const penguins = [
-'https://i.imgur.com/2yaf2wM.png',
-'https://i.imgur.com/6vOQ2Xz.png',
-'https://i.imgur.com/GkQyE0a.png',
-'https://i.imgur.com/UzPhRyp.png',
-'https://i.imgur.com/FE0Qe1f.png'
-];
-
-
-function randomPenguin() {
-return penguins[Math.floor(Math.random() * penguins.length)];
-}
-
-
-function matchPenguins() {
-document.getElementById('userPenguin').src = randomPenguin();
-document.getElementById('matchPenguin').src = randomPenguin();
-}
-</script>
+    function matchPenguins() {
+      document.getElementById('userPenguin').src = randomPenguin();
+      document.getElementById('matchPenguin').src = randomPenguin();
+    }
+  </script>
 </body>
 </html>
