@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>數字隨機配對系統</title>
+  <style>
+    :root{
+      --bg:#f6fbff;
+      --card:#ffffff;
+      --accent:#2563eb;
+      --muted:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      padding:24px;
+    }
+    .app{
+      width:100%;
+      max-width:980px;
+      background:var(--card);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 8px 30px rgba(10,20,40,0.06);
+    }
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    input[type="number"]{width:110px;padding:8px;border-radius:8px;border:1px solid #e5e7eb;}
+    label{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px}
+    button{
+      background:var(--accent);
+      color:white;
+      padding:10px 14px;
+      border:none;border-radius:10px;
+      cursor:pointer;font-weight:600;font-size:14px;
+    }
+    .main{
+      margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px;
+    }
+    .card{background:linear-gradient(180deg,#fff,#fbfdff);padding:18px;border-radius:12px;border:1px solid #eef2ff;}
+    .big-number{
+      font-size:76px;
+      font-weight:800;
+      text-align:center;
+      line-height:1;
+      padding:8px 0;
+      color:#0f172a;
+      transition: transform .18s ease;
+    }
+    .sub{color:var(--muted);text-align:center;margin-top:6px;font-size:14px}
+    .history{max-height:300px;overflow:auto;margin-top:10px;padding-top:8px;border-top:1px dashed #eef2ff}
+    .history-item{display:flex;justify-content:space-between;padding:8px 2px;font-size:14px;border-bottom:1px solid rgba(0,0,0,0.03)}
+    .settings{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .small{font-size:13px;color:var(--muted)}
+    .flash{
+      display:inline-block;
+      padding:6px 10px;border-radius:999px;background:#e6f0ff;color:#0b4bd6;font-weight:700;margin-left:8px;
+    }
+    footer{margin-top:14px;text-align:right;color:var(--muted);font-size:13px}
+    /* 小螢幕調整 */
+    @media (max-width:800px){
+      .main{grid-template-columns:1fr; }
+      .big-number{font-size:64px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="數字隨機配對系統">
+    <header>
+      <h1>數字隨機配對系統</h1>
+      <div class="controls" aria-hidden="false">
+        <label class="small">總數
+          <input id="totalCount" type="number" min="2" value="20" title="總數 (至少 2)" />
+        </label>
+        <label style="margin-left:6px;">
+          <input id="allowSelf" type="checkbox" /> 允許配到自己
+        </label>
+        <button id="matchBtn" aria-label="隨機配對按鈕">隨機配對</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <div class="card" role="region" aria-label="你的編號區塊">
+        <div class="small">你的編號</div>
+        <div id="userNum" class="big-number" aria-live="polite">—</div>
+        <div class="sub">系統會隨機選一個數字作為「你的編號」</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+          <button id="pickUserBtn" style="background:#10b981">隨機選你的編號</button>
+          <button id="clearBtn" style="background:#ef4444">清除紀錄</button>
+        </div>
+      </div>
+
+      <div class="card" role="region" aria-label="配對結果區塊">
+        <div class="small">配對結果</div>
+        <div id="matchNum" class="big-number" aria-live="polite">—</div>
+        <div class="sub" id="matchSub">按「隨機配對」或先選你的編號再配對</div>
+
+        <div class="history" id="history" aria-label="配對歷史"></div>
+      </div>
+    </div>
+
+    <div class="settings">
+      <div class="small">備註：每次配對會記錄在右側，你可以調整總數與是否允許配到自己。<span class="flash" id="lastFlash">準備就緒</span></div>
+    </div>
+
+    <footer>
+      自動生成的隨機配對 • 建議用 GitHub Pages 部署
+    </footer>
+  </div>
+
+  <script>
+    // 元件
+    const totalCountInput = document.getElementById('totalCount');
+    const allowSelfCheckbox = document.getElementById('allowSelf');
+    const matchBtn = document.getElementById('matchBtn');
+    const pickUserBtn = document.getElementById('pickUserBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const userNumEl = document.getElementById('userNum');
+    const matchNumEl = document.getElementById('matchNum');
+    const matchSub = document.getElementById('matchSub');
+    const historyEl = document.getElementById('history');
+    const lastFlash = document.getElementById('lastFlash');
+
+    // 狀態
+    let currentUser = null;
+    let history = [];
+
+    // 工具：取得 1..n 的整數
+    function randInt(n){
+      return Math.floor(Math.random() * n) + 1;
+    }
+
+    // 驗證並取得總數 (至少 2)
+    function getTotal(){
+      let n = parseInt(totalCountInput.value, 10);
+      if (Number.isNaN(n) || n < 2) {
+        n = 2;
+        totalCountInput.value = 2;
+      }
+      return n;
+    }
+
+    // 選出你的編號（隨機）
+    function pickUser(){
+      const n = getTotal();
+      currentUser = randInt(n);
+      userNumEl.textContent = currentUser;
+      animatePop(userNumEl);
+      lastFlash.textContent = '已選你的編號';
+      lastFlash.setAttribute('title', `你的編號 ${currentUser}`);
+    }
+
+    // 執行配對
+    function match(){
+      const n = getTotal();
+
+      // 如果還沒選你的編號，先選一個
+      if(currentUser === null){
+        currentUser = randInt(n);
+        userNumEl.textContent = currentUser;
+        animatePop(userNumEl);
+      }
+
+      const allowSelf = allowSelfCheckbox.checked;
+
+      // 選配對編號（不允許自己時確保不同）
+      let partner;
+      if(allowSelf){
+        partner = randInt(n);
+      } else {
+        if (n === 2) {
+          // 若 n==2，另一個一定是非 currentUser 的那一個
+          partner = currentUser === 1 ? 2 : 1;
+        } else {
+          // 一般情況：隨機挑，若同則重試（期望很快）
+          do {
+            partner = randInt(n);
+          } while (partner === currentUser);
+        }
+      }
+
+      matchNumEl.textContent = partner;
+      animatePop(matchNumEl);
+
+      // 紀錄
+      const rec = {
+        time: new Date().toLocaleString(),
+        user: currentUser,
+        partner: partner,
+        allowSelf: allowSelf
+      };
+      history.unshift(rec); // 最新在最前
+      if(history.length > 500) history.length = 500; // 限制最大紀錄數
+      renderHistory();
+      matchSub.textContent = `配對：${currentUser} ↔ ${partner} （允許配到自己：${allowSelf ? '是' : '否'}）`;
+      lastFlash.textContent = `剛配到 ${partner}`;
+    }
+
+    // 清除紀錄
+    function clearHistory(){
+      if (!confirm('確定要清除所有配對紀錄並重設畫面嗎？')) return;
+      history = [];
+      userNumEl.textContent = '—';
+      matchNumEl.textContent = '—';
+      currentUser = null;
+      renderHistory();
+      lastFlash.textContent = '已清除';
+    }
+
+    // 將 history render 到右側
+    function renderHistory(){
+      historyEl.innerHTML = '';
+      if(history.length === 0){
+        historyEl.innerHTML = '<div class="small" style="padding:8px;color:var(--muted)">目前沒有配對紀錄</div>';
+        return;
+      }
+      history.forEach((h, idx) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        const left = document.createElement('div');
+        left.textContent = `#${history.length - idx} ${h.time}`;
+        const right = document.createElement('div');
+        right.textContent = `${h.user} ↔ ${h.partner}`;
+        div.appendChild(left);
+        div.appendChild(right);
+        historyEl.appendChild(div);
+      });
+    }
+
+    // 小動畫：數字稍微放大
+    function animatePop(el){
+      el.style.transform = 'scale(1.08)';
+      setTimeout(()=> el.style.transform = 'scale(1)', 160);
+    }
+
+    // 綁定事件
+    matchBtn.addEventListener('click', match);
+    pickUserBtn.addEventListener('click', pickUser);
+    clearBtn.addEventListener('click', clearHistory);
+
+    // Enter 鍵觸發隨機配對（在 totalCount input 按 enter）
+    totalCountInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter') match();
+    });
+
+    // 初始化顯示
+    renderHistory();
+  </script>
+</body>
+</html>
