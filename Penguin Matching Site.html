@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<title>企鵝配對系統</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+background: #eef7ff;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+margin: 0;
+}
+h1 {
+margin-bottom: 20px;
+}
+.penguin-box {
+display: flex;
+gap: 40px;
+margin-top: 20px;
+}
+.penguin {
+text-align: center;
+}
+.penguin img {
+width: 150px;
+height: 150px;
+object-fit: contain;
+}
+button {
+padding: 10px 20px;
+font-size: 16px;
+cursor: pointer;
+border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<h1>企鵝配對系統</h1>
+<button onclick="matchPenguins()">隨機配對！</button>
+
+
+<div class="penguin-box">
+<div class="penguin">
+<h3>你的企鵝</h3>
+<img id="userPenguin" src="" alt="你的企鵝" />
+</div>
+<div class="penguin">
+<h3>配對企鵝</h3>
+<img id="matchPenguin" src="" alt="配對企鵝" />
+</div>
+</div>
+
+
+<script>
+const penguins = [
+'https://i.imgur.com/2yaf2wM.png',
+'https://i.imgur.com/6vOQ2Xz.png',
+'https://i.imgur.com/GkQyE0a.png',
+'https://i.imgur.com/UzPhRyp.png',
+'https://i.imgur.com/FE0Qe1f.png'
+];
+
+
+function randomPenguin() {
+return penguins[Math.floor(Math.random() * penguins.length)];
+}
+
+
+function matchPenguins() {
+document.getElementById('userPenguin').src = randomPenguin();
+document.getElementById('matchPenguin').src = randomPenguin();
+}
+</script>
+</body>
+</html>
